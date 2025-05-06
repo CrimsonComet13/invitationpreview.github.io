@@ -185,7 +185,7 @@
         <button id="playBtn" class="music-control">
             <i class="fas fa-play"></i>
         </button>
-        <div class="music-info">Canción: XV Años - Música de fondo</div>
+        <div class="music-info">Música de XV Años</div>
         <input type="range" id="volumeControl" class="volume-control" min="0" max="1" step="0.1" value="0.5">
     </div>
 
@@ -283,17 +283,16 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Audio -->
+    <!-- Audio con tu canción de Google Drive -->
     <audio id="backgroundMusic" loop>
-        <!-- Reemplaza con tu propia canción -->
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        <source src="https://drive.google.com/uc?export=download&id=138tQOiD4j0ESbkbnBVyCyjQyD2PDoI-t" type="audio/mpeg">
         Tu navegador no soporta el elemento de audio.
     </audio>
     
     <!-- Script para la cuenta regresiva -->
     <script>
         // Fecha del evento (año, mes-1, día, hora, minuto)
-        const eventDate = new Date(2026, 5, 15, 19, 0); // 15 de Junio 2024, 7:00 PM
+        const eventDate = new Date(2024, 5, 15, 19, 0); // 15 de Junio 2024, 7:00 PM
         
         function updateCountdown() {
             const now = new Date();
@@ -329,17 +328,20 @@
         const playBtn = document.getElementById('playBtn');
         const volumeControl = document.getElementById('volumeControl');
         
-        // Reproducir automáticamente (con aprobación del usuario)
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mostrar controles pero no reproducir automáticamente para evitar bloqueos
-            music.volume = volumeControl.value;
-        });
+        // Configuración inicial
+        music.volume = volumeControl.value;
         
         // Controlar el botón de play/pause
         playBtn.addEventListener('click', function() {
             if (music.paused) {
-                music.play();
-                playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                music.play()
+                    .then(() => {
+                        playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                    })
+                    .catch(error => {
+                        console.error("Error al reproducir:", error);
+                        alert("Por favor haz clic en cualquier parte de la página para activar la música");
+                    });
             } else {
                 music.pause();
                 playBtn.innerHTML = '<i class="fas fa-play"></i>';
@@ -351,26 +353,21 @@
             music.volume = this.value;
         });
         
-        // Intentar reproducción automática después de interacción del usuario
-        document.body.addEventListener('click', function firstInteraction() {
-            // Solo intentar reproducir si está pausado
+        // Intenta reproducir automáticamente después de la primera interacción
+        document.addEventListener('click', function firstInteraction() {
+            // Solo intentar si está pausado
             if (music.paused) {
-                const playPromise = music.play();
-                
-                if (playPromise !== undefined) {
-                    playPromise.then(_ => {
+                music.play()
+                    .then(() => {
                         playBtn.innerHTML = '<i class="fas fa-pause"></i>';
                     })
                     .catch(error => {
-                        // La reproducción automática falló, mantener pausado
-                        console.log("Reproducción automática prevenida por el navegador");
+                        console.log("Reproducción automática bloqueada:", error);
                     });
-                }
             }
-            
-            // Eliminar este event listener después de la primera interacción
-            document.body.removeEventListener('click', firstInteraction);
-        });
+            // Remover este listener después de la primera interacción
+            document.removeEventListener('click', firstInteraction);
+        }, { once: true });
     </script>
 </body>
 </html>
